@@ -18,7 +18,7 @@ export default async function FavoritesPage() {
 
   if (!profile) {
     return (
-      <div className="text-center py-20 text-stone-500">
+      <div className="text-center py-20" style={{ color: 'var(--da-gold-muted)', fontStyle: 'italic' }}>
         <p>No favorites yet. Search for books to get started!</p>
       </div>
     )
@@ -32,7 +32,12 @@ export default async function FavoritesPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">My Favorites</h1>
+      <h1
+        className="text-2xl"
+        style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontWeight: 700, color: 'var(--da-parchment)' }}
+      >
+        My Favorites
+      </h1>
       <FavoritesList favorites={(favorites as Favorite[]) ?? []} />
     </div>
   )

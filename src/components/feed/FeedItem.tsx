@@ -17,8 +17,11 @@ export default function FeedItem({ item }: Props) {
   const timeAgo = formatTimeAgo(item.created_at)
 
   return (
-    <div className="flex gap-3 p-4 bg-white border border-stone-200 rounded-lg">
-      <div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center shrink-0 text-sm font-medium text-stone-600">
+    <div className="dark-card flex gap-3 p-4">
+      <div
+        className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm font-medium"
+        style={{ background: 'var(--da-wood)', color: 'var(--da-parchment)' }}
+      >
         {item.profile.avatar_url ? (
           <Image
             src={item.profile.avatar_url}
@@ -33,25 +36,25 @@ export default function FeedItem({ item }: Props) {
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="text-sm">
-          <span className="font-medium">{item.profile.username}</span>
+        <p className="text-sm" style={{ color: 'var(--da-cream)' }}>
+          <span style={{ color: 'var(--da-gold)', fontWeight: 600 }}>{item.profile.username}</span>
           {' '}{label}{' '}
-          <Link href={`/books/${item.ol_work_id}`} className="font-medium hover:underline">
+          <Link href={`/books/${item.ol_work_id}`} className="da-link" style={{ fontWeight: 600 }}>
             {item.title}
           </Link>
-          {item.author && <span className="text-stone-500"> by {item.author}</span>}
+          {item.author && <span style={{ color: 'var(--da-gold-muted)', fontStyle: 'italic' }}> by {item.author}</span>}
         </p>
-        <p className="text-xs text-stone-400 mt-0.5">{timeAgo}</p>
+        <p className="text-xs mt-0.5" style={{ color: 'var(--da-wood-light)' }}>{timeAgo}</p>
       </div>
 
       {item.cover_url && (
         <Link href={`/books/${item.ol_work_id}`} className="shrink-0">
-          <div className="relative w-10 h-14">
+          <div className="relative w-10 h-14 overflow-hidden" style={{ borderRadius: '2px', boxShadow: '0 2px 6px rgba(10,8,5,0.4)' }}>
             <Image
               src={item.cover_url}
               alt={item.title}
               fill
-              className="object-cover rounded"
+              className="object-cover"
               sizes="40px"
             />
           </div>

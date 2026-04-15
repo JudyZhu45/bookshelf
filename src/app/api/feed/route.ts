@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { NextRequest } from 'next/server'
 
@@ -12,6 +12,14 @@ export async function GET(req: NextRequest) {
   const offset = (page - 1) * limit
 
   const supabase = await createServiceClient()
+
+  // Keep the current user's profile username in sync with Clerk
+  const user = await currentUser()
+  const displayName = user?.username || user?.firstName || user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] || userId
+  await supabase
+    .from('profiles')
+    .update({ username: displayName })
+    .eq('clerk_id', userId)
 
   const { data, error } = await supabase
     .from('activity_feed')

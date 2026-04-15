@@ -51,11 +51,14 @@ export default function ReadingStatusPicker({ olid, title, author, coverUrl }: P
           key={opt.value}
           onClick={() => handleChange(opt.value)}
           disabled={loading}
-          className={`w-full text-left px-3 py-1.5 rounded text-xs border transition-colors ${
-            status === opt.value
-              ? 'bg-stone-900 text-white border-stone-900'
-              : 'bg-white text-stone-600 border-stone-200 hover:bg-stone-50'
-          } disabled:opacity-50`}
+          className="w-full text-left px-3 py-1.5 text-xs border transition-colors disabled:opacity-50 cursor-pointer"
+          style={{
+            borderRadius: '2px',
+            fontFamily: 'var(--font-lora), Georgia, serif',
+            background: status === opt.value ? 'var(--da-wood)' : 'transparent',
+            color: status === opt.value ? 'var(--da-parchment)' : 'var(--da-cream)',
+            borderColor: status === opt.value ? 'var(--da-gold-muted)' : 'var(--da-wood)',
+          }}
         >
           {opt.label}
         </button>

@@ -9,9 +9,13 @@ type Props = {
 export default function FavoritesList({ favorites }: Props) {
   if (favorites.length === 0) {
     return (
-      <div className="text-center py-20 text-stone-500">
-        <p className="text-lg">No favorites yet.</p>
-        <p className="text-sm mt-1">Search for books and click the heart to save them here.</p>
+      <div className="text-center py-20" style={{ color: 'var(--da-gold-muted)' }}>
+        <p className="text-lg" style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontStyle: 'italic' }}>
+          No favorites yet.
+        </p>
+        <p className="text-sm mt-2" style={{ color: 'var(--da-cream)' }}>
+          Search for books and click the heart to save them here.
+        </p>
       </div>
     )
   }

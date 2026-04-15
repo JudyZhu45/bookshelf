@@ -20,7 +20,12 @@ export default async function FeedPage() {
 
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold">Community Feed</h1>
+      <h1
+        className="text-2xl"
+        style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontWeight: 700, color: 'var(--da-parchment)' }}
+      >
+        Community Feed
+      </h1>
       <FeedList items={items} />
     </div>
   )

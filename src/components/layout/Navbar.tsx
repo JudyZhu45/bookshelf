@@ -4,9 +4,23 @@ import SearchBar from '@/components/books/SearchBar'
 
 export default function Navbar() {
   return (
-    <header className="border-b border-stone-200 bg-white sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-4 h-14 flex items-center gap-4">
-        <Link href="/" className="font-bold text-lg shrink-0">
+    <header className="sticky top-0 z-50 border-b" style={{
+      background: 'linear-gradient(180deg, rgba(26, 20, 16, 0.98) 0%, rgba(18, 16, 14, 0.95) 100%)',
+      borderColor: 'var(--da-wood)',
+      backdropFilter: 'blur(12px)',
+    }}>
+      <div className="max-w-5xl mx-auto px-4 h-14 flex items-center gap-4">
+        <Link
+          href="/"
+          className="shrink-0 tracking-wide"
+          style={{
+            fontFamily: 'var(--font-playfair), Georgia, serif',
+            fontSize: '1.15rem',
+            fontWeight: 700,
+            color: 'var(--da-gold)',
+            textDecoration: 'none',
+          }}
+        >
           BookShelf
         </Link>
 
@@ -16,17 +30,17 @@ export default function Navbar() {
 
         <nav className="flex items-center gap-4 ml-auto text-sm">
           <Show when="signed-in">
-            <Link href="/feed" className="text-stone-600 hover:text-stone-900">
+            <Link href="/feed" className="da-link" style={{ fontSize: '0.875rem' }}>
               Feed
             </Link>
-            <Link href="/favorites" className="text-stone-600 hover:text-stone-900">
+            <Link href="/favorites" className="da-link" style={{ fontSize: '0.875rem' }}>
               Favorites
             </Link>
             <UserButton />
           </Show>
           <Show when="signed-out">
             <SignInButton mode="modal">
-              <button className="bg-stone-900 text-white px-4 py-1.5 rounded-full text-sm hover:bg-stone-700 transition-colors">
+              <button className="da-btn da-btn-gold text-sm px-4 py-1.5 rounded-sm cursor-pointer">
                 Sign in
               </button>
             </SignInButton>

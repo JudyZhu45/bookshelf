@@ -8,9 +8,13 @@ type Props = {
 export default function FeedList({ items }: Props) {
   if (items.length === 0) {
     return (
-      <div className="text-center py-20 text-stone-500">
-        <p className="text-lg">Nothing in the feed yet.</p>
-        <p className="text-sm mt-1">Start saving books and come back!</p>
+      <div className="text-center py-20" style={{ color: 'var(--da-gold-muted)' }}>
+        <p className="text-lg" style={{ fontFamily: 'var(--font-playfair), Georgia, serif', fontStyle: 'italic' }}>
+          Nothing in the feed yet.
+        </p>
+        <p className="text-sm mt-2" style={{ color: 'var(--da-cream)' }}>
+          Start saving books and come back!
+        </p>
       </div>
     )
   }

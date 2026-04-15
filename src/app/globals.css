@@ -1,26 +1,332 @@
 @import "tailwindcss";
 
+/* ─── Dark Academia Palette ─── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --da-bg-deep: #12100e;
+  --da-bg: #1a1410;
+  --da-bg-warm: #2a2018;
+  --da-wood: #3d2e1e;
+  --da-wood-light: #5a4530;
+  --da-parchment: #f0e4cf;
+  --da-parchment-dark: #e0d0b0;
+  --da-parchment-edge: #d4c4a0;
+  --da-cream: #e8dcc8;
+  --da-ink: #2a1f14;
+  --da-ink-light: #4a3d2e;
+  --da-gold: #b8860b;
+  --da-gold-bright: #d4a844;
+  --da-gold-muted: #8b7340;
+  --da-amber: #a0784c;
+  --da-burgundy: #6b2d3e;
+  --da-burgundy-light: #8a3a4e;
+  --da-green-dark: #2d3a2a;
+  --da-shadow: rgba(10, 8, 5, 0.6);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--da-bg);
+  --color-foreground: var(--da-cream);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* ─── Base ─── */
+body {
+  background: var(--da-bg);
+  color: var(--da-cream);
+  font-family: 'Lora', Georgia, 'Times New Roman', serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--da-gold);
+  color: var(--da-bg);
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--da-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--da-wood);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--da-wood-light);
+}
+
+/* ─── Dust Particles ─── */
+@keyframes dust-float {
+  0%, 100% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 0.2;
+  }
+  90% {
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(-100vh) translateX(50px) scale(0.5);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.dust-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.dust {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: var(--da-gold-muted);
+  border-radius: 50%;
+  animation: dust-float linear infinite;
+  opacity: 0;
+}
+
+/* ─── Warm Lamp Glow Overlay ─── */
+.warm-glow {
+  position: fixed;
+  top: -30%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120%;
+  height: 60%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(184, 134, 11, 0.04) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Parchment Card ─── */
+.parchment-card {
+  background: linear-gradient(
+    170deg,
+    var(--da-parchment) 0%,
+    var(--da-parchment-dark) 60%,
+    var(--da-parchment-edge) 100%
+  );
+  color: var(--da-ink);
+  border: 1px solid var(--da-parchment-edge);
+  border-radius: 3px;
+  box-shadow:
+    0 2px 8px rgba(10, 8, 5, 0.3),
+    0 1px 3px rgba(10, 8, 5, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.parchment-card:hover {
+  transform: translateY(-3px);
+  box-shadow:
+    0 8px 24px rgba(10, 8, 5, 0.4),
+    0 4px 8px rgba(10, 8, 5, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* ─── Dark Card (for dark-on-dark surfaces) ─── */
+.dark-card {
+  background: linear-gradient(
+    170deg,
+    rgba(58, 44, 30, 0.6) 0%,
+    rgba(42, 32, 24, 0.8) 100%
+  );
+  border: 1px solid rgba(90, 69, 48, 0.4);
+  border-radius: 3px;
+  box-shadow: 0 2px 8px rgba(10, 8, 5, 0.3);
+  transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+.dark-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(184, 134, 11, 0.3);
+  box-shadow:
+    0 8px 24px rgba(10, 8, 5, 0.4),
+    0 0 20px rgba(184, 134, 11, 0.05);
+}
+
+/* ─── Links ─── */
+.da-link {
+  color: var(--da-gold);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.3s ease, color 0.3s ease;
+}
+
+.da-link:hover {
+  color: var(--da-gold-bright);
+  border-bottom-color: var(--da-gold-bright);
+}
+
+/* ─── Buttons ─── */
+.da-btn {
+  background: var(--da-wood);
+  color: var(--da-parchment);
+  border: 1px solid var(--da-wood-light);
+  padding: 0.5rem 1.5rem;
+  border-radius: 3px;
+  font-family: 'Lora', Georgia, serif;
+  cursor: pointer;
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.da-btn:hover {
+  background: var(--da-wood-light);
+  border-color: var(--da-gold-muted);
+  box-shadow: 0 0 12px rgba(184, 134, 11, 0.1);
+}
+
+.da-btn-gold {
+  background: linear-gradient(135deg, var(--da-gold) 0%, var(--da-gold-muted) 100%);
+  color: var(--da-bg);
+  border: 1px solid var(--da-gold);
+  font-weight: 600;
+}
+
+.da-btn-gold:hover {
+  background: linear-gradient(135deg, var(--da-gold-bright) 0%, var(--da-gold) 100%);
+  box-shadow: 0 0 16px rgba(184, 134, 11, 0.2);
+}
+
+/* ─── Decorative Divider ─── */
+.da-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--da-gold-muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.da-divider::before,
+.da-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--da-wood-light),
+    transparent
+  );
+}
+
+/* ─── Ink Input ─── */
+.da-input {
+  background: var(--da-parchment);
+  color: var(--da-ink);
+  border: 1px solid var(--da-parchment-edge);
+  font-family: 'Lora', Georgia, serif;
+  border-radius: 3px;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.da-input::placeholder {
+  color: var(--da-ink-light);
+  font-style: italic;
+}
+
+.da-input:focus {
+  outline: none;
+  border-color: var(--da-gold-muted);
+  box-shadow: 0 0 0 2px rgba(184, 134, 11, 0.15);
+}
+
+/* ─── Wood Texture Background ─── */
+.wood-bg {
+  background-color: var(--da-bg);
+  background-image:
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 80px,
+      rgba(61, 46, 30, 0.08) 80px,
+      rgba(61, 46, 30, 0.08) 81px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 200px,
+      rgba(61, 46, 30, 0.03) 200px,
+      rgba(61, 46, 30, 0.03) 201px
+    ),
+    linear-gradient(
+      180deg,
+      var(--da-bg) 0%,
+      rgba(26, 20, 16, 0.95) 100%
+    );
+}
+
+/* ─── Flicker glow for decorative elements ─── */
+@keyframes flicker-glow {
+  0%, 100% { opacity: 0.6; }
+  25% { opacity: 0.8; }
+  50% { opacity: 0.5; }
+  75% { opacity: 0.7; }
+}
+
+.flicker {
+  animation: flicker-glow 4s ease-in-out infinite;
+}
+
+/* ─── Fade-in animation ─── */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fade-in-up 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.fade-in-delay-1 { animation-delay: 0.2s; }
+.fade-in-delay-2 { animation-delay: 0.4s; }
+.fade-in-delay-3 { animation-delay: 0.6s; }
+.fade-in-delay-4 { animation-delay: 0.8s; }
+
+/* ─── Clerk Internal Overrides ─── */
+[data-color="inherit"] {
+  color: var(--da-cream) !important;
+}
+
+[data-color="secondary"] {
+  color: var(--da-gold-muted) !important;
+}
+
+[class^="cl-internal-"] {
+  color: inherit;
+}
+
+[class*="cl-providerIcon"] {
+  filter: brightness(1.3);
+}
+
+[class^="cl-internal-"] input::placeholder,
+[class*="cl-formFieldInput"] ::placeholder,
+[class^="cl-"] input::placeholder {
+  color: var(--da-gold-muted) !important;
+  opacity: 1 !important;
 }

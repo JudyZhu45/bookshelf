@@ -29,13 +29,16 @@ export default function FavoriteButton({ olid, title, author, coverUrl }: Props)
       onClick={handleClick}
       disabled={loading}
       aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
-      className={`w-full flex items-center justify-center gap-1.5 py-1.5 rounded text-xs border transition-colors ${
-        isFavorited
-          ? 'bg-red-50 border-red-200 text-red-600 hover:bg-red-100'
-          : 'bg-stone-50 border-stone-200 text-stone-600 hover:bg-stone-100'
-      } disabled:opacity-50`}
+      className="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs border transition-colors disabled:opacity-50 cursor-pointer"
+      style={{
+        borderRadius: '2px',
+        background: isFavorited ? 'rgba(107, 45, 62, 0.15)' : 'var(--da-parchment-edge)',
+        borderColor: isFavorited ? 'var(--da-burgundy)' : 'var(--da-parchment-dark)',
+        color: isFavorited ? 'var(--da-burgundy-light)' : 'var(--da-ink-light)',
+        fontFamily: 'var(--font-lora), Georgia, serif',
+      }}
     >
-      <span>{isFavorited ? '♥' : '♡'}</span>
+      <span>{isFavorited ? '\u2665' : '\u2661'}</span>
       <span>{isFavorited ? 'Saved' : 'Save'}</span>
     </button>
   )

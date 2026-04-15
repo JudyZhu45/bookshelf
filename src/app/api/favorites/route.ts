@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { NextRequest } from 'next/server'
 
@@ -35,14 +35,21 @@ export async function POST(req: NextRequest) {
 
   const supabase = await createServiceClient()
 
+  // Get display name from Clerk
+  const user = await currentUser()
+  const displayName = user?.username || user?.firstName || user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] || userId
+
   // Upsert profile
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .upsert({ clerk_id: userId, username: userId }, { onConflict: 'clerk_id' })
+    .upsert({ clerk_id: userId, username: displayName }, { onConflict: 'clerk_id' })
     .select('id')
     .single()
 
-  if (!profile) return Response.json({ error: 'Profile error' }, { status: 500 })
+  if (!profile) {
+    console.error('Profile upsert failed:', profileError)
+    return Response.json({ error: 'Profile error', detail: profileError?.message }, { status: 500 })
+  }
 
   const { data: favorite, error } = await supabase
     .from('favorites')
@@ -51,6 +58,7 @@ export async function POST(req: NextRequest) {
     .single()
 
   if (error) {
+    console.error('Favorite insert failed:', error)
     if (error.code === '23505') return Response.json({ error: 'Already favorited' }, { status: 409 })
     return Response.json({ error: error.message }, { status: 500 })
   }

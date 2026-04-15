@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server'
+import { auth, currentUser } from '@clerk/nextjs/server'
 import { createServiceClient } from '@/lib/supabase/server'
 import { NextRequest } from 'next/server'
 
@@ -14,9 +14,13 @@ export async function POST(req: NextRequest) {
 
   const supabase = await createServiceClient()
 
+  // Get display name from Clerk
+  const user = await currentUser()
+  const displayName = user?.username || user?.firstName || user?.emailAddresses?.[0]?.emailAddress?.split('@')[0] || userId
+
   const { data: profile } = await supabase
     .from('profiles')
-    .upsert({ clerk_id: userId, username: userId }, { onConflict: 'clerk_id' })
+    .upsert({ clerk_id: userId, username: displayName }, { onConflict: 'clerk_id' })
     .select('id')
     .single()
 
