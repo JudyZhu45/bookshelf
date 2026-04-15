@@ -75,23 +75,75 @@ See `supabase/migrations/001_initial_schema.sql` for the full schema, policies, 
 
 ### 4. Ask Claude (with MCP) to describe your database. Paste the response. Does it match your mental model?
 
-> *I asked Claude via the Supabase MCP server to describe my database. The response is pasted below.*
+> *I asked Claude via the Supabase MCP server to describe the tables, columns, and RLS policies in my `bookshelf` database. The response below is from a live query against my production Supabase project.*
 
 **Claude's response (via Supabase MCP):**
 
-> Your `bookshelf` database has four user-facing tables:
+> Your `public` schema has four tables, all with Row Level Security enabled.
 >
-> 1. **`profiles`** — Stores a mirror of Clerk users. Key columns: `id` (UUID PK), `clerk_id` (unique text, the Clerk user ID), `username`, `avatar_url`, `created_at`. Publicly readable; only the owning Clerk user can insert or update their own row.
+> **`profiles`** (1 row)
+> | Column | Type | Notes |
+> |---|---|---|
+> | `id` | uuid | primary key, default `gen_random_uuid()` |
+> | `clerk_id` | text | unique — the bridge to Clerk |
+> | `username` | text | |
+> | `avatar_url` | text | nullable |
+> | `created_at` | timestamptz | default `now()` |
 >
-> 2. **`favorites`** — One row per book a user has saved. Columns: `id`, `user_id` (FK → `profiles.id`, cascade delete), `ol_work_id` (Open Library identifier), `title`, `author`, `cover_url`, `created_at`. A unique constraint on `(user_id, ol_work_id)` prevents duplicate saves. RLS restricts all SELECT/INSERT/DELETE to rows where `user_id` resolves to the requesting Clerk user.
+> Referenced by `favorites.user_id`, `reading_status.user_id`, and `activity_feed.user_id`.
 >
-> 3. **`reading_status`** — Tracks reading progress, one row per user-book. Columns: same identifying fields as `favorites`, plus a `status` column constrained to `want_to_read | reading | finished`, and `updated_at`. Unique on `(user_id, ol_work_id)`. RLS scopes reads and writes to the owning user.
+> **`favorites`** (4 rows)
+> | Column | Type | Notes |
+> |---|---|---|
+> | `id` | uuid | primary key |
+> | `user_id` | uuid | FK → `profiles.id` |
+> | `ol_work_id` | text | Open Library work ID |
+> | `title` | text | |
+> | `author` | text | nullable |
+> | `cover_url` | text | nullable |
+> | `created_at` | timestamptz | default `now()` |
 >
-> 4. **`activity_feed`** — Public community feed. Columns: `id`, `user_id`, `action` (`favorited | started_reading | finished`), book metadata, `created_at`. Everyone can SELECT; no client can INSERT directly (policy returns `false`). Rows are appended by two `AFTER INSERT/UPDATE` triggers (`fn_log_favorite` and `fn_log_reading_activity`) that fire on the other tables.
+> **`reading_status`** (0 rows)
+> | Column | Type | Notes |
+> |---|---|---|
+> | `id` | uuid | primary key |
+> | `user_id` | uuid | FK → `profiles.id` |
+> | `ol_work_id`, `title`, `author`, `cover_url` | — | book metadata |
+> | `status` | text | CHECK: `want_to_read` \| `reading` \| `finished` |
+> | `updated_at` | timestamptz | default `now()` |
 >
-> Auth integration: a SQL helper `requesting_clerk_id()` reads the `sub` claim from the JWT, and RLS policies on `favorites` and `reading_status` join against `profiles.clerk_id` through that helper. Clerk's JWT template `supabase` issues the token; Supabase's Third-Party Auth trusts Clerk as the issuer.
+> **`activity_feed`** (5 rows)
+> | Column | Type | Notes |
+> |---|---|---|
+> | `id` | uuid | primary key |
+> | `user_id` | uuid | FK → `profiles.id` |
+> | `action` | text | CHECK: `favorited` \| `started_reading` \| `finished` |
+> | `ol_work_id`, `title`, `author`, `cover_url` | — | book metadata |
+> | `created_at` | timestamptz | default `now()` |
+>
+> **RLS policies:**
+>
+> | Table | Policy | Cmd | Rule |
+> |---|---|---|---|
+> | `profiles` | `profiles_select_all` | SELECT | `true` (publicly readable) |
+> | `profiles` | `profiles_insert_own` | INSERT | `clerk_id = requesting_clerk_id()` |
+> | `profiles` | `profiles_update_own` | UPDATE | `clerk_id = requesting_clerk_id()` |
+> | `favorites` | `favorites_select_own` | SELECT | `user_id = (SELECT id FROM profiles WHERE clerk_id = requesting_clerk_id())` |
+> | `favorites` | `favorites_insert_own` | INSERT | same match via profiles lookup |
+> | `favorites` | `favorites_delete_own` | DELETE | same match via profiles lookup |
+> | `reading_status` | `reading_status_select_own` | SELECT | profiles lookup |
+> | `reading_status` | `reading_status_insert_own` | INSERT | profiles lookup |
+> | `reading_status` | `reading_status_update_own` | UPDATE | profiles lookup |
+> | `activity_feed` | `feed_select_all` | SELECT | `true` (public community feed) |
+> | `activity_feed` | `feed_no_direct_insert` | INSERT | `false` — only database triggers can write |
+>
+> The helper function `requesting_clerk_id()` extracts the `sub` claim from the Clerk-issued JWT and is used by every per-user policy. Activity-feed rows are appended automatically by two `AFTER INSERT/UPDATE` triggers (`fn_log_favorite` on `favorites`, `fn_log_reading_activity` on `reading_status`).
 
-**Does it match my mental model?** Mostly yes. The thing I want to flag is the trigger-based `activity_feed`: I originally pictured the API route writing to both `favorites` and `activity_feed` in sequence, but moving that to a Postgres trigger means the two stay consistent even if I forget a call-site in the future. Everything else — the `clerk_id` bridge, the `(user_id, ol_work_id)` uniqueness, the RLS scoping — lines up with how I designed it.
+**Does it match my mental model?** Yes, and the live row counts are a nice sanity check: one profile has produced four favorites and five activity-feed entries, which tells me the favorite trigger fired four times and the reading-status trigger fired once — exactly what I'd expect. A few things the MCP output clarified:
+
+- **There is no `favorites_update_own` policy**, and intentionally so — I treat a favorite as an immutable record. You either save it or delete it, which simplifies the RLS surface.
+- **`activity_feed` has an `INSERT` policy with `CHECK (false)`**, which at first looked like a mistake but is actually the point: *no client*, not even the service role via PostgREST, should insert directly. Only the `SECURITY DEFINER` triggers can populate it. This enforces the invariant that every feed row corresponds to a real `favorites` or `reading_status` action.
+- The `clerk_id` bridge, the `requesting_clerk_id()` helper, and the `(user_id, ol_work_id)` uniqueness all line up with the design I wrote in `supabase/migrations/001_initial_schema.sql`.
 
 ---
 
